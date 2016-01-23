@@ -93,12 +93,13 @@ func (uHandlers *UsersHandlers) ReadUserProfile(w http.ResponseWriter, r *http.R
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 
-		userMap := make(map[string]string)
-		userMap["first_name"] = userDetails.first_name
-		userMap["last_name"] = userDetails.last_name
-		userMap["tel1"] = userDetails.tel1
-		userMap["tel2"] = userDetails.tel2
-		userMap["avatar"] = userDetails.avatar
+		userMap := map[string]string{
+			"first_name": userDetails.first_name,
+			"last_name":  userDetails.last_name,
+			"tel1":       userDetails.tel1,
+			"tel2":       userDetails.tel2,
+			"avatar":     userDetails.avatar,
+		}
 
 		if err := json.NewEncoder(w).Encode(userMap); err != nil {
 			panic(err)
