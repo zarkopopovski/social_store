@@ -16,6 +16,15 @@ type User struct {
 	date_created string
 }
 
+type UserDetails struct {
+	credentials_id string
+	first_name     string
+	last_name      string
+	tel1           string
+	tel2           string
+	avatar         string
+}
+
 func (user *User) CreateNewUser(dbConnection *DBConnection) bool {
 
 	sha1Hash := sha1.New()
@@ -45,7 +54,7 @@ func (user *User) LoginWithCredentials(dbConnection *DBConnection, email string,
 
 	query := "SELECT id, nick_name, email FROM credentials WHERE email='" + email + "' AND password='" + password + "' AND status='ENABLE'"
 
-	var err = dbConnection.db.QueryRow(query).Scan(&user.id, &user.nick_name, &user.email)
+	err := dbConnection.db.QueryRow(query).Scan(&user.id, &user.nick_name, &user.email)
 
 	if err != nil {
 		log.Fatal(err)
@@ -53,6 +62,36 @@ func (user *User) LoginWithCredentials(dbConnection *DBConnection, email string,
 	}
 
 	return user
+}
+
+func (user *User) UpdateUserProfile(dbConnection *DBConnection, userDetails *UserDetails) bool {
+
+	query := "INSERT INTO user_details(credentials_id, first_name, last_name, tel1, tel2, avatar, date_created, date_modified) VALUES('" + userDetails.credentials_id + "', '" + userDetails.first_name + "','" + userDetails.last_name + "','" + userDetails.tel1 + "','" + userDetails.tel2 + "','" + userDetails.avatar + "',NOW(), NOW())"
+
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	return true
+}
+
+func (user *User) ReadUserProfile(dbConnection *DBConnection, token string) *UserDetails {
+
+	userDetails := UserDetails{}
+
+	query := "SELECT first_name, last_name, tel1, tel2, avatar FROM user_details WHERE credentials_id='" + token + "'"
+
+	err := dbConnection.db.QueryRow(query).Scan(&userDetails.first_name, &userDetails.last_name, &userDetails.tel1, &userDetails.tel2, &userDetails.avatar)
+
+	if err != nil {
+		log.Fatal(err)
+		return nil
+	}
+
+	return &userDetails
 }
 
 type Users []User

@@ -16,6 +16,8 @@ func RoutesMap(api *ApiConnection) Routes {
 		Route{"Index", "GET", "/", api.Index},
 		Route{"SignIn", "POST", "/signin", api.uHandlers.SignIn},
 		Route{"Login", "POST", "/login", api.uHandlers.Login},
+		Route{"UpdateProfile", "POST", "/update_profile", api.uHandlers.UpdateProfile},
+		Route{"ReadProfile", "POST", "/read_profile", api.uHandlers.ReadUserProfile},
 	}
 
 	return routes
