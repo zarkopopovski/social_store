@@ -24,8 +24,6 @@ func (sHandlers *StoresHandlers) CreateStore(w http.ResponseWriter, r *http.Requ
 
 	result := store.CreateNewStore(sHandlers.dbConnection)
 
-	//result := sHandlers.dbConnection.CreateNewStore(store)
-
 	if result {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
@@ -54,11 +52,54 @@ func (sHandlers *StoresHandlers) UpdateStore(w http.ResponseWriter, r *http.Requ
 
 	result := store.UpdateStoreDetails(sHandlers.dbConnection)
 
-	//result := sHandlers.dbConnection.UpdateStoreDetails(store)
+	if result {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
+}
+
+func (sHandlers *StoresHandlers) DeleteStore(w http.ResponseWriter, r *http.Request) {
+	token := r.FormValue("token")
+	storeId := r.FormValue("store_id")
+
+	store := &Store{id: storeId, credentials_id: token}
+
+	result := store.DeleteExistingStore(sHandlers.dbConnection)
 
 	if result {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
+}
+
+func (sHandlers *StoresHandlers) ListPersonalStores(w http.ResponseWriter, r *http.Request) {
+	token := r.FormValue("token")
+
+	store := &Store{credentials_id: token}
+	stores := store.ListPersonalExistingStores(sHandlers.dbConnection)
+
+	if stores != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+
+		if err := json.NewEncoder(w).Encode(stores); err != nil {
+			panic(err)
+		}
+
 		return
 	}
 

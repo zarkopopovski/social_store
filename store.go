@@ -32,7 +32,7 @@ func (store *Store) CreateNewStore(dbConnection *DBConnection) bool {
 	}
 
 	query := "INSERT INTO stores(id, credentials_id, name, address, city, zip, country, tel, photo, deleted, date_created, date_modified) " +
-		"VALUES('" + storeID + "', " + store.credentials_id + "', '" + store.name + "', '" + store.address + "', '" + store.city + "', '" + store.zip + "', " + string(store.country) + ", '" + store.tel + "', '" + store.photo + "', 0, NOW(), NOW())"
+		"VALUES('" + storeID + "', '" + store.credentials_id + "', '" + store.name + "', '" + store.address + "', '" + store.city + "', '" + store.zip + "', " + string(store.country) + ", '" + store.tel + "', '" + store.photo + "', 0, NOW(), NOW())"
 
 	_, err := dbConnection.db.Exec(query)
 
@@ -58,3 +58,52 @@ func (store *Store) UpdateStoreDetails(dbConnection *DBConnection) bool {
 
 	return true
 }
+
+func (store *Store) DeleteExistingStore(dbConnection *DBConnection) bool {
+
+	query := "UPDATE store SET deleted=1, date_modified=NOW() WHERE id='" + store.id + "' AND credentials_id='" + store.credentials_id + "'"
+
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	return true
+}
+
+func (store *Store) ListPersonalExistingStores(dbConnection *DBConnection) []*Store {
+
+	query := "SELECT id, credentials_id, name, address, city, zip, country, tel, photo FROM stores WHERE credentials_id='" + store.credentials_id + "' AND deleted=0"
+
+	rows, err := dbConnection.db.Query(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return nil
+	}
+
+	defer rows.Close()
+
+	stores := make([]*Store, 0)
+
+	for rows.Next() {
+
+		newStore := new(Store)
+
+		err := rows.Scan(&newStore.id, &newStore.credentials_id, &newStore.name, &newStore.address, &newStore.city, &newStore.zip, &newStore.country, &newStore.tel, &newStore.photo)
+
+		if err != nil {
+			log.Fatal(err)
+			return nil
+		}
+
+		stores = append(stores, newStore)
+
+	}
+
+	return stores
+}
+
+type Stores []Store
