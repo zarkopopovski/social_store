@@ -26,22 +26,3 @@ func (dbConnection *DBConnection) createNewDBConnection() (err error) {
 
 	return
 }
-
-func (dbConnection *DBConnection) CreateNewUser(user *User) bool {
-	return user.CreateNewUser(dbConnection)
-}
-
-func (dbConnection *DBConnection) LoginWithCredentials(email string, password string) *User {
-	user := &User{}
-	return user.LoginWithCredentials(dbConnection, email, password)
-}
-
-func (dbConnection *DBConnection) UpdateUserProfile(userDetails *UserDetails) bool {
-	user := &User{}
-	return user.UpdateUserProfile(dbConnection, userDetails)
-}
-
-func (dbConnection *DBConnection) ReadUserProfile(token string) *UserDetails {
-	user := &User{}
-	return user.ReadUserProfile(dbConnection, token)
-}

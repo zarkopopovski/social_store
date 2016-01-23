@@ -17,7 +17,7 @@ func (uHandlers *UsersHandlers) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	user := &User{nick_name: name, email: email, password: password, source: source}
 
-	result := uHandlers.dbConnection.CreateNewUser(user)
+	result := user.CreateNewUser(uHandlers.dbConnection)
 
 	if result {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -36,7 +36,8 @@ func (uHandlers *UsersHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	user := uHandlers.dbConnection.LoginWithCredentials(email, password)
+	user := &User{}
+	user = user.LoginWithCredentials(uHandlers.dbConnection, email, password)
 
 	if user != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -67,9 +68,10 @@ func (uHandlers *UsersHandlers) UpdateProfile(w http.ResponseWriter, r *http.Req
 	tel2 := r.FormValue("tel2")
 	avatar := r.FormValue("avatar")
 
+	user := &User{}
 	userDetails := &UserDetails{credentials_id: token, first_name: firstName, last_name: lastName, tel1: tel1, tel2: tel2, avatar: avatar}
 
-	result := uHandlers.dbConnection.UpdateUserProfile(userDetails)
+	result := user.UpdateUserProfile(uHandlers.dbConnection, userDetails)
 
 	if result {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -87,7 +89,8 @@ func (uHandlers *UsersHandlers) UpdateProfile(w http.ResponseWriter, r *http.Req
 func (uHandlers *UsersHandlers) ReadUserProfile(w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("token")
 
-	userDetails := uHandlers.dbConnection.ReadUserProfile(token)
+	user := &User{}
+	userDetails := user.ReadUserProfile(uHandlers.dbConnection, token)
 
 	if userDetails != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")

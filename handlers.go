@@ -8,14 +8,17 @@ import (
 type ApiConnection struct {
 	dbConnection *DBConnection
 	uHandlers    *UsersHandlers
+	sHandlers    *StoresHandlers
 }
 
 func CreateApiConnection() *ApiConnection {
 	API := &ApiConnection{
 		dbConnection: OpenConnectionSession(),
 		uHandlers:    &UsersHandlers{},
+		sHandlers:    &StoresHandlers{},
 	}
 	API.uHandlers.dbConnection = API.dbConnection
+	API.sHandlers.dbConnection = API.dbConnection
 
 	return API
 }

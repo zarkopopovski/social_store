@@ -7,13 +7,12 @@ import (
 )
 
 type User struct {
-	id           string
-	nick_name    string
-	email        string
-	password     string
-	source       string
-	status       string
-	date_created string
+	id        string
+	nick_name string
+	email     string
+	password  string
+	source    string
+	status    string
 }
 
 type UserDetails struct {
@@ -38,7 +37,8 @@ func (user *User) CreateNewUser(dbConnection *DBConnection) bool {
 		return false
 	}
 
-	query := "INSERT INTO credentials(id, nick_name, email, password, source, status, suspended, deleted, date_created, date_modified) VALUES('" + credentialsID + "', '" + user.nick_name + "', '" + user.email + "', '" + user.password + "', '" + user.source + "', 'ENABLE', 'NO', 0, NOW(), NOW())"
+	query := "INSERT INTO credentials(id, nick_name, email, password, source, status, suspended, deleted, date_created, date_modified) " +
+		"VALUES('" + credentialsID + "', '" + user.nick_name + "', '" + user.email + "', '" + user.password + "', '" + user.source + "', 'ENABLE', 'NO', 0, NOW(), NOW())"
 
 	_, err := dbConnection.db.Exec(query)
 
@@ -52,7 +52,8 @@ func (user *User) CreateNewUser(dbConnection *DBConnection) bool {
 
 func (user *User) LoginWithCredentials(dbConnection *DBConnection, email string, password string) *User {
 
-	query := "SELECT id, nick_name, email FROM credentials WHERE email='" + email + "' AND password='" + password + "' AND status='ENABLE'"
+	query := "SELECT id, nick_name, email FROM credentials WHERE email='" + email + "' " +
+		"AND password='" + password + "' AND status='ENABLE'"
 
 	err := dbConnection.db.QueryRow(query).Scan(&user.id, &user.nick_name, &user.email)
 
@@ -66,8 +67,14 @@ func (user *User) LoginWithCredentials(dbConnection *DBConnection, email string,
 
 func (user *User) UpdateUserProfile(dbConnection *DBConnection, userDetails *UserDetails) bool {
 
-	query := "INSERT INTO user_details(credentials_id, first_name, last_name, tel1, tel2, avatar, date_created, date_modified) VALUES('" + userDetails.credentials_id + "', '" + userDetails.first_name + "','" + userDetails.last_name + "','" + userDetails.tel1 + "','" + userDetails.tel2 + "','" + userDetails.avatar + "',NOW(), NOW())"
+	testUserDetails := user.ReadUserProfile(dbConnection, userDetails.credentials_id)
 
+	query := "UPDATE user_details SET first_name='" + userDetails.first_name + "', last_name='" + userDetails.last_name + "', tel1='" + userDetails.tel1 + "', tel2='" + userDetails.tel2 + "', avatar='" + userDetails.avatar + "', date_modified=NOW() WHERE credentials_id='" + userDetails.credentials_id + "'"
+
+	if testUserDetails == nil {
+		query = "INSERT INTO user_details(credentials_id, first_name, last_name, tel1, tel2, avatar, date_created, date_modified) " +
+			"VALUES('" + userDetails.credentials_id + "', '" + userDetails.first_name + "','" + userDetails.last_name + "','" + userDetails.tel1 + "','" + userDetails.tel2 + "','" + userDetails.avatar + "',NOW(), NOW())"
+	}
 	_, err := dbConnection.db.Exec(query)
 
 	if err != nil {
