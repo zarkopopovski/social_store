@@ -9,6 +9,7 @@ type ApiConnection struct {
 	dbConnection *DBConnection
 	uHandlers    *UsersHandlers
 	sHandlers    *StoresHandlers
+	pHandlers    *ProductsHandlers
 }
 
 func CreateApiConnection() *ApiConnection {
@@ -16,9 +17,11 @@ func CreateApiConnection() *ApiConnection {
 		dbConnection: OpenConnectionSession(),
 		uHandlers:    &UsersHandlers{},
 		sHandlers:    &StoresHandlers{},
+		pHandlers:    &ProductsHandlers{},
 	}
 	API.uHandlers.dbConnection = API.dbConnection
 	API.sHandlers.dbConnection = API.dbConnection
+	API.pHandlers.dbConnection = API.dbConnection
 
 	return API
 }
