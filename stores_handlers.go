@@ -20,7 +20,10 @@ func (sHandlers *StoresHandlers) CreateStore(w http.ResponseWriter, r *http.Requ
 
 	photo := r.FormValue("photo")
 
-	store := &Store{credentials_id: token, name: name, address: address, city: city, zip: zip, country: country, tel: tel, photo: photo}
+	latitude := r.FormValue("lat")
+	longitude := r.FormValue("lon")
+
+	store := &Store{credentials_id: token, name: name, address: address, city: city, zip: zip, country: country, tel: tel, photo: photo, lat: latitude, lon: longitude}
 
 	result := store.CreateNewStore(sHandlers.dbConnection)
 

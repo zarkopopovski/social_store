@@ -16,6 +16,8 @@ type Store struct {
 	country        string
 	tel            string
 	photo          string
+	lat            string
+	lon            string
 }
 
 func (store *Store) CreateNewStore(dbConnection *DBConnection) bool {
@@ -31,8 +33,9 @@ func (store *Store) CreateNewStore(dbConnection *DBConnection) bool {
 		return false
 	}
 
-	query := "INSERT INTO stores(id, credentials_id, name, address, city, zip, country, tel, photo, deleted, date_created, date_modified) " +
-		"VALUES('" + storeID + "', '" + store.credentials_id + "', '" + store.name + "', '" + store.address + "', '" + store.city + "', '" + store.zip + "', " + string(store.country) + ", '" + store.tel + "', '" + store.photo + "', 0, NOW(), NOW())"
+	query := "INSERT INTO stores(id, credentials_id, name, address, city, zip, country, tel, photo, lat, lon, deleted, date_created, date_modified) " +
+		"VALUES('" + storeID + "', '" + store.credentials_id + "', '" + store.name + "', '" + store.address + "', '" + store.city + "', '" + store.zip + "', " +
+		store.country + ", '" + store.tel + "', '" + store.photo + "', '" + store.lat + "', '" + store.lon + "', 0, NOW(), NOW())"
 
 	_, err := dbConnection.db.Exec(query)
 
@@ -46,8 +49,8 @@ func (store *Store) CreateNewStore(dbConnection *DBConnection) bool {
 
 func (store *Store) UpdateStoreDetails(dbConnection *DBConnection) bool {
 
-	query := "UPDATE store SET name='" + store.name + "', address='" + store.address + "', city='" + store.city + "', zip='" + store.zip + "', country=" + string(store.country) + ", tel='" + store.tel + "', photo='" + store.photo + "', date_modified=NOW() " +
-		"WHERE id='" + store.id + "' AND credentials_id='" + store.credentials_id + "'"
+	query := "UPDATE store SET name='" + store.name + "', address='" + store.address + "', city='" + store.city + "', zip='" + store.zip + "', country=" + store.country +
+		", tel='" + store.tel + "', photo='" + store.photo + "', lat='" + store.lat + "', lon='" + store.lon + "', date_modified=NOW() WHERE id='" + store.id + "' AND credentials_id='" + store.credentials_id + "'"
 
 	_, err := dbConnection.db.Exec(query)
 
