@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 )
 
 type StoresHandlers struct {
@@ -115,10 +116,10 @@ func (sHandlers *StoresHandlers) ListPersonalStores(w http.ResponseWriter, r *ht
 
 func (sHandlers *StoresHandlers) ListStores(w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("token")
-	pageID := r.FormValue("pageID")
+	pageID, _ := strconv.Atoi(r.FormValue("pageID"))
 
 	store := &Store{credentials_id: token}
-	stores := store.ListStoresByPages(dbConnection, pageID)
+	stores := store.ListStoresByPages(sHandlers.dbConnection, pageID)
 
 	if stores != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")

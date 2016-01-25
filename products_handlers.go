@@ -49,7 +49,7 @@ func (pHandlers *ProductsHandlers) UpdateProduct(w http.ResponseWriter, r *http.
 
 	product := &Product{id: productID, credentials_id: token, store_id: storeID, product_code: productCode, category: category, name: name, description: description, price: price, currency: currency}
 
-	result := product.UpdateExistingProduct(dbConnection)
+	result := product.UpdateExistingProduct(pHandlers.dbConnection)
 
 	if result {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -70,7 +70,7 @@ func (pHandlers *ProductsHandlers) DeleteProduct(w http.ResponseWriter, r *http.
 
 	product := &Product{id: productID, credentials_id: token}
 
-	result := product.DeleteExistingProduct(dbConnection)
+	result := product.DeleteExistingProduct(pHandlers.dbConnection)
 
 	if result {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
