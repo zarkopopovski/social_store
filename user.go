@@ -48,6 +48,7 @@ func (user *User) CreateNewUser(dbConnection *DBConnection) bool {
 	}
 
 	return true
+
 }
 
 func (user *User) LoginWithCredentials(dbConnection *DBConnection, email string, password string) *User {
@@ -63,6 +64,7 @@ func (user *User) LoginWithCredentials(dbConnection *DBConnection, email string,
 	}
 
 	return user
+
 }
 
 func (user *User) UpdateUserProfile(dbConnection *DBConnection, userDetails *UserDetails) bool {
@@ -83,6 +85,7 @@ func (user *User) UpdateUserProfile(dbConnection *DBConnection, userDetails *Use
 	}
 
 	return true
+
 }
 
 func (user *User) ReadUserProfile(dbConnection *DBConnection, token string) *UserDetails {
@@ -99,6 +102,7 @@ func (user *User) ReadUserProfile(dbConnection *DBConnection, token string) *Use
 	}
 
 	return &userDetails
+
 }
 
 type Users []User

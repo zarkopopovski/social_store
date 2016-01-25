@@ -16,6 +16,7 @@ type Product struct {
 	description    string
 	price          string
 	currency       string
+	image_name     string
 }
 
 func (product *Product) CreateNewProduct(dbConnection *DBConnection) bool {
@@ -42,5 +43,87 @@ func (product *Product) CreateNewProduct(dbConnection *DBConnection) bool {
 		return false
 	}
 
+	sha1Hash.Write([]byte(product.credentials_id + " " + product.image_name))
+	sha1HashString = sha1Hash.Sum(nil)
+
+	productImageID := fmt.Sprintf("%x", sha1HashString)
+
+	query = "INSERT INTO products_gallery(id, credentials_id, stores_id, products_id, image_name, main_photo, deleted, date_created, date_modified) " +
+		"VALUES('" + productImageID + "','" + product.credentials_id + "','" + product.store_id + "','" + product.id + "','" + product.image_name + "','YES',0,NOW(), NOW())"
+
+	_, err = dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
 	return true
+
+}
+
+func (product *Product) UpdateExistingProduct(dbConnection *DBConnection) bool {
+
+	query := "UPDATE products SET product_code='" + product.product_code + "', category=" + product.category + ", name='" + product.name + "', description='" + product.description + "', price='" + product.price + "', currency='" + product.currency + "' " +
+		"WHERE id='" + product.id + "'"
+
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	return true
+
+}
+
+func (product *Product) DeleteExistingProduct(dbConnection *DBConnection) bool {
+
+	query := "UPDATE products SET deleted=1 WHERE id='" + product.id + "'"
+
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	return true
+
+}
+
+func (product *Product) ListAllProductsByStore(dbConnection *DBConnection) []*Product {
+
+	query := "SELECT p.id, p.credentials_id, p.stores_id, p.product_code, p.category, p.name, p.description, p.price, p.currency, pg.image_name FROM products p LEFT JOIN products_gallery pg " +
+		"ON p.stores_id='" + product.store_id + "' AND p.deleted=0 AND p.id=pg.products_id AND pg.main_photo='YES' AND p.deleted=0"
+
+	rows, err := dbConnection.db.Query(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return nil
+	}
+
+	defer rows.Close()
+
+	products := make([]*Product, 0)
+
+	for rows.Next() {
+
+		newProduct := new(Product)
+
+		err := rows.Scan(&newProduct.id, &newProduct.credentials_id, &newProduct.store_id, &newProduct.category, &newProduct.name, &newProduct.description, &newProduct.price, &newProduct.currency, &newProduct.image_name)
+
+		if err != nil {
+			log.Fatal(err)
+			return nil
+		}
+
+		products = append(products, newProduct)
+
+	}
+
+	return products
+
 }

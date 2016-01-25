@@ -35,3 +35,15 @@ func (pHandlers *ProductsHandlers) CreateProduct(w http.ResponseWriter, r *http.
 		panic(err)
 	}
 }
+
+func (pHandlers *ProductsHandlers) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (pHandlers *ProductsHandlers) DeleteProduct(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (pHandlers *ProductsHandlers) ListProductsByStore(w http.ResponseWriter, r *http.Request) {
+
+}

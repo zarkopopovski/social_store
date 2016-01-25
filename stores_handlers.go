@@ -112,3 +112,7 @@ func (sHandlers *StoresHandlers) ListPersonalStores(w http.ResponseWriter, r *ht
 		panic(err)
 	}
 }
+
+func (sHandlers *StoresHandlers) ListStores(w http.ResponseWriter, r *http.Request) {
+
+}

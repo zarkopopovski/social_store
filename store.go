@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"log"
+	"strconv"
 )
 
 type Store struct {
@@ -16,6 +17,7 @@ type Store struct {
 	country        string
 	tel            string
 	photo          string
+	avatar         string
 	lat            string
 	lon            string
 }
@@ -45,6 +47,7 @@ func (store *Store) CreateNewStore(dbConnection *DBConnection) bool {
 	}
 
 	return true
+
 }
 
 func (store *Store) UpdateStoreDetails(dbConnection *DBConnection) bool {
@@ -60,6 +63,7 @@ func (store *Store) UpdateStoreDetails(dbConnection *DBConnection) bool {
 	}
 
 	return true
+
 }
 
 func (store *Store) DeleteExistingStore(dbConnection *DBConnection) bool {
@@ -74,11 +78,12 @@ func (store *Store) DeleteExistingStore(dbConnection *DBConnection) bool {
 	}
 
 	return true
+
 }
 
 func (store *Store) ListPersonalExistingStores(dbConnection *DBConnection) []*Store {
 
-	query := "SELECT id, credentials_id, name, address, city, zip, country, tel, photo FROM stores WHERE credentials_id='" + store.credentials_id + "' AND deleted=0"
+	query := "SELECT id, credentials_id, name, address, city, zip, country, tel, photo, lat, lon FROM stores WHERE credentials_id='" + store.credentials_id + "' AND deleted=0"
 
 	rows, err := dbConnection.db.Query(query)
 
@@ -95,7 +100,7 @@ func (store *Store) ListPersonalExistingStores(dbConnection *DBConnection) []*St
 
 		newStore := new(Store)
 
-		err := rows.Scan(&newStore.id, &newStore.credentials_id, &newStore.name, &newStore.address, &newStore.city, &newStore.zip, &newStore.country, &newStore.tel, &newStore.photo)
+		err := rows.Scan(&newStore.id, &newStore.credentials_id, &newStore.name, &newStore.address, &newStore.city, &newStore.zip, &newStore.country, &newStore.tel, &newStore.photo, &newStore.lat, &newStore.lon)
 
 		if err != nil {
 			log.Fatal(err)
@@ -107,6 +112,44 @@ func (store *Store) ListPersonalExistingStores(dbConnection *DBConnection) []*St
 	}
 
 	return stores
+
+}
+
+func (store *Store) ListStoresByPages(dbConnection *DBConnection, pageID int) []*Store {
+
+	offSet := pageID * 10
+
+	query := "SELECT s.id, s.credentials_id, s.name, s.address, s.city, s.zip, s.country, s.tel, s.photo, c.avatar FROM stores s LEFT JOIN credentials c " +
+		"ON s.credentials_id=c.id AND s.deleted=0 ORDER BY s.date_created LIMIT " + strconv.Itoa(offSet) + ",10"
+
+	rows, err := dbConnection.db.Query(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return nil
+	}
+
+	defer rows.Close()
+
+	stores := make([]*Store, 0)
+
+	for rows.Next() {
+
+		newStore := new(Store)
+
+		err := rows.Scan(&newStore.id, &newStore.credentials_id, &newStore.name, &newStore.address, &newStore.city, &newStore.zip, &newStore.country, &newStore.tel, &newStore.photo, &newStore.avatar)
+
+		if err != nil {
+			log.Fatal(err)
+			return nil
+		}
+
+		stores = append(stores, newStore)
+
+	}
+
+	return stores
+
 }
 
 type Stores []Store
