@@ -42,7 +42,7 @@ func (sHandlers *StoresHandlers) CreateStore(w http.ResponseWriter, r *http.Requ
 
 func (sHandlers *StoresHandlers) UpdateStore(w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("token")
-	storeId := r.FormValue("store_id")
+	storeID := r.FormValue("store_id")
 	name := r.FormValue("name")
 	address := r.FormValue("address")
 	city := r.FormValue("city")
@@ -51,7 +51,7 @@ func (sHandlers *StoresHandlers) UpdateStore(w http.ResponseWriter, r *http.Requ
 	tel := r.FormValue("tel")
 	photo := r.FormValue("photo")
 
-	store := &Store{id: storeId, credentials_id: token, name: name, address: address, city: city, zip: zip, country: country, tel: tel, photo: photo}
+	store := &Store{id: storeID, credentials_id: token, name: name, address: address, city: city, zip: zip, country: country, tel: tel, photo: photo}
 
 	result := store.UpdateStoreDetails(sHandlers.dbConnection)
 
@@ -70,9 +70,9 @@ func (sHandlers *StoresHandlers) UpdateStore(w http.ResponseWriter, r *http.Requ
 
 func (sHandlers *StoresHandlers) DeleteStore(w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("token")
-	storeId := r.FormValue("store_id")
+	storeID := r.FormValue("store_id")
 
-	store := &Store{id: storeId, credentials_id: token}
+	store := &Store{id: storeID, credentials_id: token}
 
 	result := store.DeleteExistingStore(sHandlers.dbConnection)
 
@@ -114,5 +114,26 @@ func (sHandlers *StoresHandlers) ListPersonalStores(w http.ResponseWriter, r *ht
 }
 
 func (sHandlers *StoresHandlers) ListStores(w http.ResponseWriter, r *http.Request) {
+	token := r.FormValue("token")
+	pageID := r.FormValue("pageID")
 
+	store := &Store{credentials_id: token}
+	stores := store.ListStoresByPages(dbConnection, pageID)
+
+	if stores != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+
+		if err := json.NewEncoder(w).Encode(stores); err != nil {
+			panic(err)
+		}
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
 }
