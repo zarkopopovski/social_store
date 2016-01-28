@@ -78,6 +78,48 @@ func (product *Product) UpdateExistingProduct(dbConnection *DBConnection) bool {
 
 }
 
+func (product *Product) CreateNewProductPhoto(dbConnection *DBConnection) bool {
+
+	sha1Hash := sha1.New()
+	sha1Hash.Write([]byte(product.credentials_id + " " + product.name + " " + product.image_name))
+	sha1HashString := sha1Hash.Sum(nil)
+
+	productImageID := fmt.Sprintf("%x", sha1HashString)
+
+	if err := dbConnection.db.Ping(); err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	query := "INSERT INTO products_gallery(id, credentials_id, stores_id, products_id, image_name, main_photo, deleted, date_created, date_modified) " +
+		"VALUES('" + productImageID + "','" + product.credentials_id + "','" + product.store_id + "','" + product.id + "','" + product.image_name + "','NO',0,NOW(), NOW())"
+
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	return true
+
+}
+
+func (product *Product) DeleteProductPhoto(dbConnection *DBConnection, photoID string) bool {
+
+	query := "UPDATE products_gallery SET deleted=1, date_modified=NOW() WHERE id='" + photoID + "'"
+
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	return true
+
+}
+
 func (product *Product) DeleteExistingProduct(dbConnection *DBConnection) bool {
 
 	query := "UPDATE products SET deleted=1 WHERE id='" + product.id + "'"

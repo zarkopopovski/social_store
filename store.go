@@ -53,7 +53,22 @@ func (store *Store) CreateNewStore(dbConnection *DBConnection) bool {
 func (store *Store) UpdateStoreDetails(dbConnection *DBConnection) bool {
 
 	query := "UPDATE store SET name='" + store.name + "', address='" + store.address + "', city='" + store.city + "', zip='" + store.zip + "', country=" + store.country +
-		", tel='" + store.tel + "', photo='" + store.photo + "', lat='" + store.lat + "', lon='" + store.lon + "', date_modified=NOW() WHERE id='" + store.id + "' AND credentials_id='" + store.credentials_id + "'"
+		", tel='" + store.tel + ", lat='" + store.lat + "', lon='" + store.lon + "', date_modified=NOW() WHERE id='" + store.id + "' AND credentials_id='" + store.credentials_id + "'"
+
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	return true
+
+}
+
+func (store *Store) UpdateStorePhoto(dbConnection *DBConnection) bool {
+
+	query := "UPDATE store SET photo='" + store.photo + "', date_modified=NOW() WHERE id='" + store.id + "' AND credentials_id='" + store.credentials_id + "'"
 
 	_, err := dbConnection.db.Exec(query)
 

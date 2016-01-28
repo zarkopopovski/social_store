@@ -2,11 +2,14 @@ package main
 
 import (
 	"database/sql"
+	"github.com/fzzy/radix/redis"
 	_ "github.com/go-sql-driver/mysql"
+	"time"
 )
 
 type DBConnection struct {
-	db *sql.DB
+	db     *sql.DB
+	client *redis.Client
 }
 
 func OpenConnectionSession() (dbConnection *DBConnection) {
@@ -23,6 +26,17 @@ func (dbConnection *DBConnection) createNewDBConnection() (err error) {
 	}
 
 	dbConnection.db = connection
+
+	return
+}
+
+func (dbConnection *DBConnection) createNewCacheConnection() (err error) {
+	client, err := redis.DialTimeout("tcp", "127.0.0.1:6379", time.Duration(10)*time.Second)
+	if err != nil {
+		panic(err)
+	}
+
+	dbConnection.client = client
 
 	return
 }

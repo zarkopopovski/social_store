@@ -19,7 +19,28 @@ func (pHandlers *ProductsHandlers) CreateProduct(w http.ResponseWriter, r *http.
 	price := r.FormValue("price")
 	currency := r.FormValue("currency")
 
-	product := &Product{credentials_id: token, store_id: storeID, product_code: productCode, category: category, name: name, description: description, price: price, currency: currency}
+	file, header, err := r.FormFile("file")
+
+	if err != nil {
+		fmt.Fprintln(w, err)
+		return
+	}
+
+	defer file.Close()
+
+	out, err := os.Create("/Users/zarkopopovski/Documents/GOWorkspace/receive/uploads/" + header.Filename)
+
+	if err != nil {
+	}
+
+	defer out.Close()
+
+	_, err = io.Copy(out, file)
+
+	if err != nil {
+	}
+
+	product := &Product{credentials_id: token, store_id: storeID, product_code: productCode, category: category, name: name, description: description, price: price, currency: currency, image_name: header.Filename}
 
 	result := product.CreateNewProduct(pHandlers.dbConnection)
 
@@ -83,6 +104,9 @@ func (pHandlers *ProductsHandlers) DeleteProduct(w http.ResponseWriter, r *http.
 	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
 		panic(err)
 	}
+}
+
+func (pHandlers *ProductsHandlers) CreateProductPhoto(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pHandlers *ProductsHandlers) ListProductsByStore(w http.ResponseWriter, r *http.Request) {

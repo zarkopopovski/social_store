@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -19,12 +21,29 @@ func (sHandlers *StoresHandlers) CreateStore(w http.ResponseWriter, r *http.Requ
 	country := r.FormValue("country")
 	tel := r.FormValue("tel")
 
-	photo := r.FormValue("photo")
-
 	latitude := r.FormValue("lat")
 	longitude := r.FormValue("lon")
 
-	store := &Store{credentials_id: token, name: name, address: address, city: city, zip: zip, country: country, tel: tel, photo: photo, lat: latitude, lon: longitude}
+	file, header, err := r.FormFile("file")
+
+	if err != nil {
+	}
+
+	defer file.Close()
+
+	out, err := os.Create("/Users/zarkopopovski/Documents/GOWorkspace/receive/uploads/" + header.Filename)
+
+	if err != nil {
+	}
+
+	defer out.Close()
+
+	_, err = io.Copy(out, file)
+
+	if err != nil {
+	}
+
+	store := &Store{credentials_id: token, name: name, address: address, city: city, zip: zip, country: country, tel: tel, photo: header.Filename, lat: latitude, lon: longitude}
 
 	result := store.CreateNewStore(sHandlers.dbConnection)
 
@@ -50,11 +69,50 @@ func (sHandlers *StoresHandlers) UpdateStore(w http.ResponseWriter, r *http.Requ
 	zip := r.FormValue("zip")
 	country := r.FormValue("country")
 	tel := r.FormValue("tel")
-	photo := r.FormValue("photo")
 
-	store := &Store{id: storeID, credentials_id: token, name: name, address: address, city: city, zip: zip, country: country, tel: tel, photo: photo}
+	store := &Store{id: storeID, credentials_id: token, name: name, address: address, city: city, zip: zip, country: country, tel: tel}
 
 	result := store.UpdateStoreDetails(sHandlers.dbConnection)
+
+	if result {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
+}
+
+func (sHandlers *StoresHandlers) UpdateStorePhoto(w http.ResponseWriter, r *http.Request) {
+	token := r.FormValue("token")
+	storeID := r.FormValue("store_id")
+
+	file, header, err := r.FormFile("file")
+
+	if err != nil {
+	}
+
+	defer file.Close()
+
+	out, err := os.Create("/Users/zarkopopovski/Documents/GOWorkspace/receive/uploads/" + header.Filename)
+
+	if err != nil {
+	}
+
+	defer out.Close()
+
+	_, err = io.Copy(out, file)
+
+	if err != nil {
+	}
+
+	store := &Store{id: storeID, credentials_id: token, photo: header.Filename}
+
+	result := store.UpdateStorePhoto(sHandlers.dbConnection)
 
 	if result {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")

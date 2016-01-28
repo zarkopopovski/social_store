@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
+	"os"
 )
 
 type UsersHandlers struct {
@@ -66,10 +68,28 @@ func (uHandlers *UsersHandlers) UpdateProfile(w http.ResponseWriter, r *http.Req
 	lastName := r.FormValue("last_name")
 	tel1 := r.FormValue("tel1")
 	tel2 := r.FormValue("tel2")
-	avatar := r.FormValue("avatar")
+
+	file, header, err := r.FormFile("file")
+
+	if err != nil {
+	}
+
+	defer file.Close()
+
+	out, err := os.Create("/Users/zarkopopovski/Documents/GOWorkspace/receive/uploads/" + header.Filename)
+
+	if err != nil {
+	}
+
+	defer out.Close()
+
+	_, err = io.Copy(out, file)
+
+	if err != nil {
+	}
 
 	user := &User{}
-	userDetails := &UserDetails{credentials_id: token, first_name: firstName, last_name: lastName, tel1: tel1, tel2: tel2, avatar: avatar}
+	userDetails := &UserDetails{credentials_id: token, first_name: firstName, last_name: lastName, tel1: tel1, tel2: tel2, avatar: header.Filename}
 
 	result := user.UpdateUserProfile(uHandlers.dbConnection, userDetails)
 
