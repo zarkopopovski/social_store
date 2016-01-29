@@ -1,10 +1,14 @@
 package main
 
 import (
+	"crypto/sha1"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 )
 
 type UsersHandlers struct {
@@ -76,7 +80,19 @@ func (uHandlers *UsersHandlers) UpdateProfile(w http.ResponseWriter, r *http.Req
 
 	defer file.Close()
 
-	out, err := os.Create("/Users/zarkopopovski/Documents/GOWorkspace/receive/uploads/" + header.Filename)
+	timeNow := time.Now()
+	nanoTime := timeNow.UnixNano()
+	nanoInMillis := nanoTime / 100000
+
+	sha1Hash := sha1.New()
+	sha1Hash.Write([]byte(strconv.FormatInt(nanoInMillis, 10) + " " + token + " " + firstName + lastName + " " + header.Filename))
+	sha1HashString := sha1Hash.Sum(nil)
+
+	fileHash := fmt.Sprintf("%x", sha1HashString)
+
+	hashedFileName := fileHash + "" + header.Filename
+
+	out, err := os.Create("/Users/zarkopopovski/Documents/GOWorkspace/SocialStore/uploads/" + hashedFileName)
 
 	if err != nil {
 	}
@@ -89,7 +105,7 @@ func (uHandlers *UsersHandlers) UpdateProfile(w http.ResponseWriter, r *http.Req
 	}
 
 	user := &User{}
-	userDetails := &UserDetails{credentials_id: token, first_name: firstName, last_name: lastName, tel1: tel1, tel2: tel2, avatar: header.Filename}
+	userDetails := &UserDetails{credentials_id: token, first_name: firstName, last_name: lastName, tel1: tel1, tel2: tel2, avatar: hashedFileName}
 
 	result := user.UpdateUserProfile(uHandlers.dbConnection, userDetails)
 

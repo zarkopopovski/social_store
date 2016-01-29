@@ -1,11 +1,14 @@
 package main
 
 import (
+	"crypto/sha1"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 type StoresHandlers struct {
@@ -31,7 +34,19 @@ func (sHandlers *StoresHandlers) CreateStore(w http.ResponseWriter, r *http.Requ
 
 	defer file.Close()
 
-	out, err := os.Create("/Users/zarkopopovski/Documents/GOWorkspace/receive/uploads/" + header.Filename)
+	timeNow := time.Now()
+	nanoTime := timeNow.UnixNano()
+	nanoInMillis := nanoTime / 100000
+
+	sha1Hash := sha1.New()
+	sha1Hash.Write([]byte(strconv.FormatInt(nanoInMillis, 10) + " " + token + " " + name + " " + header.Filename))
+	sha1HashString := sha1Hash.Sum(nil)
+
+	fileHash := fmt.Sprintf("%x", sha1HashString)
+
+	hashedFileName := fileHash + "" + header.Filename
+
+	out, err := os.Create("/Users/zarkopopovski/Documents/GOWorkspace/SocialStore/uploads/" + hashedFileName)
 
 	if err != nil {
 	}
@@ -43,7 +58,7 @@ func (sHandlers *StoresHandlers) CreateStore(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 	}
 
-	store := &Store{credentials_id: token, name: name, address: address, city: city, zip: zip, country: country, tel: tel, photo: header.Filename, lat: latitude, lon: longitude}
+	store := &Store{credentials_id: token, name: name, address: address, city: city, zip: zip, country: country, tel: tel, photo: hashedFileName, lat: latitude, lon: longitude}
 
 	result := store.CreateNewStore(sHandlers.dbConnection)
 
@@ -98,7 +113,19 @@ func (sHandlers *StoresHandlers) UpdateStorePhoto(w http.ResponseWriter, r *http
 
 	defer file.Close()
 
-	out, err := os.Create("/Users/zarkopopovski/Documents/GOWorkspace/receive/uploads/" + header.Filename)
+	timeNow := time.Now()
+	nanoTime := timeNow.UnixNano()
+	nanoInMillis := nanoTime / 100000
+
+	sha1Hash := sha1.New()
+	sha1Hash.Write([]byte(strconv.FormatInt(nanoInMillis, 10) + " " + token + " " + storeID + " " + header.Filename))
+	sha1HashString := sha1Hash.Sum(nil)
+
+	fileHash := fmt.Sprintf("%x", sha1HashString)
+
+	hashedFileName := fileHash + "" + header.Filename
+
+	out, err := os.Create("/Users/zarkopopovski/Documents/GOWorkspace/SocialStore/uploads/" + hashedFileName)
 
 	if err != nil {
 	}
