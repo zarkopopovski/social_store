@@ -4,9 +4,7 @@ import (
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 )
@@ -73,36 +71,19 @@ func (uHandlers *UsersHandlers) UpdateProfile(w http.ResponseWriter, r *http.Req
 	tel1 := r.FormValue("tel1")
 	tel2 := r.FormValue("tel2")
 
-	file, header, err := r.FormFile("file")
-
-	if err != nil {
-	}
-
-	defer file.Close()
+	imageName := r.FormValue("image_name")
 
 	timeNow := time.Now()
 	nanoTime := timeNow.UnixNano()
 	nanoInMillis := nanoTime / 100000
 
 	sha1Hash := sha1.New()
-	sha1Hash.Write([]byte(strconv.FormatInt(nanoInMillis, 10) + " " + token + " " + firstName + lastName + " " + header.Filename))
+	sha1Hash.Write([]byte(strconv.FormatInt(nanoInMillis, 10) + "" + token + "" + firstName + lastName + "" + imageName))
 	sha1HashString := sha1Hash.Sum(nil)
 
 	fileHash := fmt.Sprintf("%x", sha1HashString)
 
-	hashedFileName := fileHash + "" + header.Filename
-
-	out, err := os.Create("/Users/zarkopopovski/Documents/GOWorkspace/SocialStore/uploads/" + hashedFileName)
-
-	if err != nil {
-	}
-
-	defer out.Close()
-
-	_, err = io.Copy(out, file)
-
-	if err != nil {
-	}
+	hashedFileName := fileHash + "" + imageName
 
 	user := &User{}
 	userDetails := &UserDetails{credentials_id: token, first_name: firstName, last_name: lastName, tel1: tel1, tel2: tel2, avatar: hashedFileName}

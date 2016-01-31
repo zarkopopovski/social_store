@@ -4,9 +4,7 @@ import (
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 )
@@ -27,36 +25,19 @@ func (sHandlers *StoresHandlers) CreateStore(w http.ResponseWriter, r *http.Requ
 	latitude := r.FormValue("lat")
 	longitude := r.FormValue("lon")
 
-	file, header, err := r.FormFile("file")
-
-	if err != nil {
-	}
-
-	defer file.Close()
+	imageName := r.FormValue("image_name")
 
 	timeNow := time.Now()
 	nanoTime := timeNow.UnixNano()
 	nanoInMillis := nanoTime / 100000
 
 	sha1Hash := sha1.New()
-	sha1Hash.Write([]byte(strconv.FormatInt(nanoInMillis, 10) + " " + token + " " + name + " " + header.Filename))
+	sha1Hash.Write([]byte(strconv.FormatInt(nanoInMillis, 10) + "" + token + "" + name + "" + imageName))
 	sha1HashString := sha1Hash.Sum(nil)
 
 	fileHash := fmt.Sprintf("%x", sha1HashString)
 
-	hashedFileName := fileHash + "" + header.Filename
-
-	out, err := os.Create("/Users/zarkopopovski/Documents/GOWorkspace/SocialStore/uploads/" + hashedFileName)
-
-	if err != nil {
-	}
-
-	defer out.Close()
-
-	_, err = io.Copy(out, file)
-
-	if err != nil {
-	}
+	hashedFileName := fileHash + "" + imageName
 
 	store := &Store{credentials_id: token, name: name, address: address, city: city, zip: zip, country: country, tel: tel, photo: hashedFileName, lat: latitude, lon: longitude}
 
@@ -106,38 +87,21 @@ func (sHandlers *StoresHandlers) UpdateStorePhoto(w http.ResponseWriter, r *http
 	token := r.FormValue("token")
 	storeID := r.FormValue("store_id")
 
-	file, header, err := r.FormFile("file")
-
-	if err != nil {
-	}
-
-	defer file.Close()
+	imageName := r.FormValue("image_name")
 
 	timeNow := time.Now()
 	nanoTime := timeNow.UnixNano()
 	nanoInMillis := nanoTime / 100000
 
 	sha1Hash := sha1.New()
-	sha1Hash.Write([]byte(strconv.FormatInt(nanoInMillis, 10) + " " + token + " " + storeID + " " + header.Filename))
+	sha1Hash.Write([]byte(strconv.FormatInt(nanoInMillis, 10) + "" + token + "" + storeID + "" + imageName))
 	sha1HashString := sha1Hash.Sum(nil)
 
 	fileHash := fmt.Sprintf("%x", sha1HashString)
 
-	hashedFileName := fileHash + "" + header.Filename
+	hashedFileName := fileHash + "" + imageName
 
-	out, err := os.Create("/Users/zarkopopovski/Documents/GOWorkspace/SocialStore/uploads/" + hashedFileName)
-
-	if err != nil {
-	}
-
-	defer out.Close()
-
-	_, err = io.Copy(out, file)
-
-	if err != nil {
-	}
-
-	store := &Store{id: storeID, credentials_id: token, photo: header.Filename}
+	store := &Store{id: storeID, credentials_id: token, photo: hashedFileName}
 
 	result := store.UpdateStorePhoto(sHandlers.dbConnection)
 
