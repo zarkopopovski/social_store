@@ -137,9 +137,28 @@ func (pHandlers *ProductsHandlers) CreateProductPhoto(w http.ResponseWriter, r *
 	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
 		panic(err)
 	}
-
 }
 
 func (pHandlers *ProductsHandlers) ListProductsByStore(w http.ResponseWriter, r *http.Request) {
+	storeID := r.FormValue("store_id")
 
+	product := &Product{store_id: storeID}
+	products := product.ListAllProductsByStore(pHandlers.dbConnection)
+
+	if products != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+
+		if err := json.NewEncoder(w).Encode(products); err != nil {
+			panic(err)
+		}
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
 }
