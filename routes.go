@@ -22,11 +22,16 @@ func RoutesMap(api *ApiConnection) Routes {
 		Route{"UpdateStore", "POST", "/update_store", api.sHandlers.UpdateStore},
 		Route{"UpdateStorePhoto", "POST", "/update_store_photo", api.sHandlers.UpdateStorePhoto},
 		Route{"DeleteStore", "POST", "/delete_store", api.sHandlers.DeleteStore},
+		Route{"RateStore", "POST", "/rate_store", api.sHandlers.SetStoreRate},
+		Route{"ChangeRate", "POST", "/change_rate", api.sHandlers.ChangeStoreRate},
 		Route{"ListPersonalStores", "POST", "/personal_stores", api.sHandlers.ListPersonalStores},
 		Route{"ListStores", "POST", "/list_stores", api.sHandlers.ListStores},
 		Route{"CreateProduct", "POST", "/create_product", api.pHandlers.CreateProduct},
 		Route{"UpdateProduct", "POST", "/update_product", api.pHandlers.UpdateProduct},
 		Route{"DeleteProduct", "POST", "/delete_product", api.pHandlers.DeleteProduct},
+		Route{"SetLikeProduct", "POST", "/like_product", api.pHandlers.SetLikeProduct},
+		Route{"DeleteLikeProduct", "POST", "/remove_like_product", api.pHandlers.RemoveLikeProduct},
+		Route{"ReadProductLikes", "POST", "/read_product_likes", api.pHandlers.ReadProductLikes},
 		Route{"ListProducts", "POST", "/list_product", api.pHandlers.ListProductsByStore},
 	}
 

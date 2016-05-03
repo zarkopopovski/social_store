@@ -139,6 +139,50 @@ func (sHandlers *StoresHandlers) DeleteStore(w http.ResponseWriter, r *http.Requ
 	}
 }
 
+func (sHandlers *StoresHandlers) SetStoreRate(w http.ResponseWriter, r *http.Request) {
+	token := r.FormValue("token")
+	storeID := r.FormValue("store_id")
+	rate := r.FormValue("rate")
+
+	store := &Store{id: storeID, credentials_id: token}
+
+	result := store.SetStoreRate(sHandlers.dbConnection, rate)
+
+	if result {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
+}
+
+func (sHandlers *StoresHandlers) ChangeStoreRate(w http.ResponseWriter, r *http.Request) {
+	token := r.FormValue("token")
+	storeID := r.FormValue("store_id")
+	rate := r.FormValue("rate")
+
+	store := &Store{id: storeID, credentials_id: token}
+
+	result := store.SetStoreRate(sHandlers.dbConnection, rate)
+
+	if result {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
+}
+
 func (sHandlers *StoresHandlers) ListPersonalStores(w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("token")
 

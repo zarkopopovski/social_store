@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 )
 
 type Store struct {
@@ -165,6 +166,73 @@ func (store *Store) ListStoresByPages(dbConnection *DBConnection, pageID int) []
 
 	return stores
 
+}
+
+func (store *Store) SetStoreRate(dbConnection *DBConnection, rate string) bool {
+	r := dbConnection.client.Cmd("select", 8)
+
+	if r != nil {
+		log.Fatal(r.Err)
+		return false
+	}
+
+	r = dbConnection.client.Cmd("sadd", "Store:Rate:"+store.id, store.credentials_id+":"+rate)
+
+	if r != nil {
+		log.Fatal(r.Err)
+		return false
+	}
+
+	return true
+}
+
+func (store *Store) UpdateStoreRate(dbConnection *DBConnection, rate string) bool {
+	r := dbConnection.client.Cmd("select", 8)
+
+	oldRateValue := ""
+
+	if r != nil {
+		log.Fatal(r.Err)
+		return false
+	}
+
+	r = dbConnection.client.Cmd("smember", "Store:Rate:"+store.id)
+
+	if r != nil {
+		log.Fatal(r.Err)
+		return false
+	}
+
+	vals, _ := r.List()
+
+	for i := 0; i < len(vals); i++ {
+		values := strings.Split(vals[i], ":")
+
+		if values[0] == store.credentials_id {
+			oldRateValue = vals[i]
+			break
+		}
+	}
+
+	if oldRateValue != "" {
+		r = dbConnection.client.Cmd("srem", "Store:Rate:"+store.id, oldRateValue)
+
+		if r != nil {
+			log.Fatal(r.Err)
+			return false
+		}
+
+		r = dbConnection.client.Cmd("sadd", "Store:Rate:"+store.id, store.credentials_id+":"+rate)
+
+		if r != nil {
+			log.Fatal(r.Err)
+			return false
+		}
+
+		return true
+	}
+
+	return false
 }
 
 type Stores []Store

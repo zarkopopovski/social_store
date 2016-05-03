@@ -162,3 +162,70 @@ func (pHandlers *ProductsHandlers) ListProductsByStore(w http.ResponseWriter, r 
 		panic(err)
 	}
 }
+
+func (pHandlers *ProductsHandlers) SetLikeProduct(w http.ResponseWriter, r *http.Request) {
+	token := r.FormValue("token")
+	productID := r.FormValue("product_id")
+
+	product := &Product{id: productID, credentials_id: token}
+	result := product.SetLikeToProduct(pHandlers.dbConnection)
+
+	if result {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
+}
+
+func (pHandlers *ProductsHandlers) RemoveLikeProduct(w http.ResponseWriter, r *http.Request) {
+	token := r.FormValue("token")
+	productID := r.FormValue("product_id")
+
+	product := &Product{id: productID, credentials_id: token}
+	result := product.RemoveLikeFromProduct(pHandlers.dbConnection)
+
+	if result {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
+}
+
+func (pHandlers *ProductsHandlers) ReadProductLikes(w http.ResponseWriter, r *http.Request) {
+	token := r.FormValue("token")
+	productID := r.FormValue("product_id")
+
+	product := &Product{id: productID, credentials_id: token}
+	result := product.ReadProductsLikes(pHandlers.dbConnection)
+
+	if result != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+
+		if err := json.NewEncoder(w).Encode(result); err != nil {
+			panic(err)
+		}
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
+}

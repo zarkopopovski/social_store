@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/fzzy/radix/redis"
 	_ "github.com/go-sql-driver/mysql"
 	"time"
@@ -15,6 +16,7 @@ type DBConnection struct {
 func OpenConnectionSession() (dbConnection *DBConnection) {
 	dbConnection = new(DBConnection)
 	dbConnection.createNewDBConnection()
+	dbConnection.createNewCacheConnection()
 
 	return
 }
@@ -25,6 +27,7 @@ func (dbConnection *DBConnection) createNewDBConnection() (err error) {
 		panic(err)
 	}
 
+	fmt.Println("MySQL Connection is Active")
 	dbConnection.db = connection
 
 	return
@@ -36,6 +39,7 @@ func (dbConnection *DBConnection) createNewCacheConnection() (err error) {
 		panic(err)
 	}
 
+	fmt.Println("Redis Connection is Active")
 	dbConnection.client = client
 
 	return

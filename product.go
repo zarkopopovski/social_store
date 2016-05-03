@@ -32,7 +32,7 @@ func (product *Product) CreateNewProduct(dbConnection *DBConnection) bool {
 		return false
 	}
 
-	query := "INSERT INTO products(id, credentials_id, stores,id, product_code, category, name, description, price, currency, deleted, date_created, date_modified) " +
+	query := "INSERT INTO products(id, credentials_id, stores_id, product_code, category, name, description, price, currency, deleted, date_created, date_modified) " +
 		"VALUES('" + productID + "','" + product.credentials_id + "','" + product.store_id + "','" + product.product_code + "', " + product.category + ", '" + product.name + "', '" + product.description + "', '" +
 		product.price + "', '" + product.currency + "', 0, NOW(), NOW())"
 
@@ -168,4 +168,61 @@ func (product *Product) ListAllProductsByStore(dbConnection *DBConnection) []*Pr
 
 	return products
 
+}
+
+func (product *Product) SetLikeToProduct(dbConnection *DBConnection) bool {
+	r := dbConnection.client.Cmd("select", 8)
+
+	if r != nil {
+		fmt.Println("Error selecting DB")
+		log.Fatal(r.Err)
+		return false
+	}
+
+	r = dbConnection.client.Cmd("sadd", "Product:Likes:"+product.id, product.credentials_id)
+
+	if r != nil {
+		log.Fatal(r.Err)
+		return false
+	}
+
+	return true
+}
+
+func (product *Product) RemoveLikeFromProduct(dbConnection *DBConnection) bool {
+	r := dbConnection.client.Cmd("select", 8)
+
+	if r != nil {
+		log.Fatal(r.Err)
+		return false
+	}
+
+	r = dbConnection.client.Cmd("srem", "Product:Likes:"+product.id, product.credentials_id)
+
+	if r != nil {
+		log.Fatal(r.Err)
+		return false
+	}
+
+	return true
+}
+
+func (product *Product) ReadProductsLikes(dbConnection *DBConnection) []string {
+	r := dbConnection.client.Cmd("select", 8)
+
+	if r != nil {
+		log.Fatal(r.Err)
+		return nil
+	}
+
+	r = dbConnection.client.Cmd("smembers", "Product:Likes:"+product.id)
+
+	if r != nil {
+		log.Fatal(r.Err)
+		return nil
+	}
+
+	vals, _ := r.List()
+
+	return vals
 }
