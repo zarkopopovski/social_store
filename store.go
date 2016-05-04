@@ -169,14 +169,23 @@ func (store *Store) ListStoresByPages(dbConnection *DBConnection, pageID int) []
 }
 
 func (store *Store) SetStoreRate(dbConnection *DBConnection, rate string) bool {
-	r := dbConnection.client.Cmd("select", 8)
+	client, err := dbConnection.pool.Get()
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	defer dbConnection.pool.CarefullyPut(client, &err)
+
+	r := client.Cmd("select", 8)
 
 	if r != nil {
 		log.Fatal(r.Err)
 		return false
 	}
 
-	r = dbConnection.client.Cmd("sadd", "Store:Rate:"+store.id, store.credentials_id+":"+rate)
+	r = client.Cmd("sadd", "Store:Rate:"+store.id, store.credentials_id+":"+rate)
 
 	if r != nil {
 		log.Fatal(r.Err)
@@ -187,7 +196,16 @@ func (store *Store) SetStoreRate(dbConnection *DBConnection, rate string) bool {
 }
 
 func (store *Store) UpdateStoreRate(dbConnection *DBConnection, rate string) bool {
-	r := dbConnection.client.Cmd("select", 8)
+	client, err := dbConnection.pool.Get()
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	defer dbConnection.pool.CarefullyPut(client, &err)
+
+	r := client.Cmd("select", 8)
 
 	oldRateValue := ""
 
@@ -196,7 +214,7 @@ func (store *Store) UpdateStoreRate(dbConnection *DBConnection, rate string) boo
 		return false
 	}
 
-	r = dbConnection.client.Cmd("smember", "Store:Rate:"+store.id)
+	r = client.Cmd("smember", "Store:Rate:"+store.id)
 
 	if r != nil {
 		log.Fatal(r.Err)
@@ -215,14 +233,14 @@ func (store *Store) UpdateStoreRate(dbConnection *DBConnection, rate string) boo
 	}
 
 	if oldRateValue != "" {
-		r = dbConnection.client.Cmd("srem", "Store:Rate:"+store.id, oldRateValue)
+		r = client.Cmd("srem", "Store:Rate:"+store.id, oldRateValue)
 
 		if r != nil {
 			log.Fatal(r.Err)
 			return false
 		}
 
-		r = dbConnection.client.Cmd("sadd", "Store:Rate:"+store.id, store.credentials_id+":"+rate)
+		r = client.Cmd("sadd", "Store:Rate:"+store.id, store.credentials_id+":"+rate)
 
 		if r != nil {
 			log.Fatal(r.Err)

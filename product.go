@@ -171,7 +171,16 @@ func (product *Product) ListAllProductsByStore(dbConnection *DBConnection) []*Pr
 }
 
 func (product *Product) SetLikeToProduct(dbConnection *DBConnection) bool {
-	r := dbConnection.client.Cmd("select", 8)
+	client, err := dbConnection.pool.Get()
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	defer dbConnection.pool.CarefullyPut(client, &err)
+
+	r := client.Cmd("select", 8)
 
 	if r != nil {
 		fmt.Println("Error selecting DB")
@@ -179,7 +188,7 @@ func (product *Product) SetLikeToProduct(dbConnection *DBConnection) bool {
 		return false
 	}
 
-	r = dbConnection.client.Cmd("sadd", "Product:Likes:"+product.id, product.credentials_id)
+	r = client.Cmd("sadd", "Product:Likes:"+product.id, product.credentials_id)
 
 	if r != nil {
 		log.Fatal(r.Err)
@@ -190,14 +199,23 @@ func (product *Product) SetLikeToProduct(dbConnection *DBConnection) bool {
 }
 
 func (product *Product) RemoveLikeFromProduct(dbConnection *DBConnection) bool {
-	r := dbConnection.client.Cmd("select", 8)
+	client, err := dbConnection.pool.Get()
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	defer dbConnection.pool.CarefullyPut(client, &err)
+
+	r := client.Cmd("select", 8)
 
 	if r != nil {
 		log.Fatal(r.Err)
 		return false
 	}
 
-	r = dbConnection.client.Cmd("srem", "Product:Likes:"+product.id, product.credentials_id)
+	r = client.Cmd("srem", "Product:Likes:"+product.id, product.credentials_id)
 
 	if r != nil {
 		log.Fatal(r.Err)
@@ -208,14 +226,23 @@ func (product *Product) RemoveLikeFromProduct(dbConnection *DBConnection) bool {
 }
 
 func (product *Product) ReadProductsLikes(dbConnection *DBConnection) []string {
-	r := dbConnection.client.Cmd("select", 8)
+	client, err := dbConnection.pool.Get()
+
+	if err != nil {
+		log.Fatal(err)
+		return nil
+	}
+
+	defer dbConnection.pool.CarefullyPut(client, &err)
+
+	r := client.Cmd("select", 8)
 
 	if r != nil {
 		log.Fatal(r.Err)
 		return nil
 	}
 
-	r = dbConnection.client.Cmd("smembers", "Product:Likes:"+product.id)
+	r = client.Cmd("smembers", "Product:Likes:"+product.id)
 
 	if r != nil {
 		log.Fatal(r.Err)
