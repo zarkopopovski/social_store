@@ -169,25 +169,25 @@ func (store *Store) ListStoresByPages(dbConnection *DBConnection, pageID int) []
 }
 
 func (store *Store) SetStoreRate(dbConnection *DBConnection, rate string) bool {
-	client, err := dbConnection.pool.Get()
+	client, err := dbConnection.cache.Get()
 
 	if err != nil {
 		log.Fatal(err)
 		return false
 	}
 
-	defer dbConnection.pool.CarefullyPut(client, &err)
+	defer dbConnection.cache.Put(client)
 
 	r := client.Cmd("select", 8)
 
-	if r != nil {
+	if r.Err != nil {
 		log.Fatal(r.Err)
 		return false
 	}
 
 	r = client.Cmd("sadd", "Store:Rate:"+store.id, store.credentials_id+":"+rate)
 
-	if r != nil {
+	if r.Err != nil {
 		log.Fatal(r.Err)
 		return false
 	}
@@ -196,27 +196,27 @@ func (store *Store) SetStoreRate(dbConnection *DBConnection, rate string) bool {
 }
 
 func (store *Store) UpdateStoreRate(dbConnection *DBConnection, rate string) bool {
-	client, err := dbConnection.pool.Get()
+	client, err := dbConnection.cache.Get()
 
 	if err != nil {
 		log.Fatal(err)
 		return false
 	}
 
-	defer dbConnection.pool.CarefullyPut(client, &err)
+	defer dbConnection.cache.Put(client)
 
 	r := client.Cmd("select", 8)
 
 	oldRateValue := ""
 
-	if r != nil {
+	if r.Err != nil {
 		log.Fatal(r.Err)
 		return false
 	}
 
 	r = client.Cmd("smember", "Store:Rate:"+store.id)
 
-	if r != nil {
+	if r.Err != nil {
 		log.Fatal(r.Err)
 		return false
 	}
@@ -235,14 +235,14 @@ func (store *Store) UpdateStoreRate(dbConnection *DBConnection, rate string) boo
 	if oldRateValue != "" {
 		r = client.Cmd("srem", "Store:Rate:"+store.id, oldRateValue)
 
-		if r != nil {
+		if r.Err != nil {
 			log.Fatal(r.Err)
 			return false
 		}
 
 		r = client.Cmd("sadd", "Store:Rate:"+store.id, store.credentials_id+":"+rate)
 
-		if r != nil {
+		if r.Err != nil {
 			log.Fatal(r.Err)
 			return false
 		}

@@ -171,18 +171,18 @@ func (product *Product) ListAllProductsByStore(dbConnection *DBConnection) []*Pr
 }
 
 func (product *Product) SetLikeToProduct(dbConnection *DBConnection) bool {
-	client, err := dbConnection.pool.Get()
+	client, err := dbConnection.cache.Get()
 
 	if err != nil {
 		log.Fatal(err)
 		return false
 	}
 
-	defer dbConnection.pool.CarefullyPut(client, &err)
+	defer dbConnection.cache.Put(client)
 
 	r := client.Cmd("select", 8)
 
-	if r != nil {
+	if r.Err != nil {
 		fmt.Println("Error selecting DB")
 		log.Fatal(r.Err)
 		return false
@@ -190,7 +190,7 @@ func (product *Product) SetLikeToProduct(dbConnection *DBConnection) bool {
 
 	r = client.Cmd("sadd", "Product:Likes:"+product.id, product.credentials_id)
 
-	if r != nil {
+	if r.Err != nil {
 		log.Fatal(r.Err)
 		return false
 	}
@@ -199,25 +199,25 @@ func (product *Product) SetLikeToProduct(dbConnection *DBConnection) bool {
 }
 
 func (product *Product) RemoveLikeFromProduct(dbConnection *DBConnection) bool {
-	client, err := dbConnection.pool.Get()
+	client, err := dbConnection.cache.Get()
 
 	if err != nil {
 		log.Fatal(err)
 		return false
 	}
 
-	defer dbConnection.pool.CarefullyPut(client, &err)
+	defer dbConnection.cache.Put(client)
 
 	r := client.Cmd("select", 8)
 
-	if r != nil {
+	if r.Err != nil {
 		log.Fatal(r.Err)
 		return false
 	}
 
 	r = client.Cmd("srem", "Product:Likes:"+product.id, product.credentials_id)
 
-	if r != nil {
+	if r.Err != nil {
 		log.Fatal(r.Err)
 		return false
 	}
@@ -226,25 +226,25 @@ func (product *Product) RemoveLikeFromProduct(dbConnection *DBConnection) bool {
 }
 
 func (product *Product) ReadProductsLikes(dbConnection *DBConnection) []string {
-	client, err := dbConnection.pool.Get()
+	client, err := dbConnection.cache.Get()
 
 	if err != nil {
 		log.Fatal(err)
 		return nil
 	}
 
-	defer dbConnection.pool.CarefullyPut(client, &err)
+	defer dbConnection.cache.Put(client)
 
 	r := client.Cmd("select", 8)
 
-	if r != nil {
+	if r.Err != nil {
 		log.Fatal(r.Err)
 		return nil
 	}
 
 	r = client.Cmd("smembers", "Product:Likes:"+product.id)
 
-	if r != nil {
+	if r.Err != nil {
 		log.Fatal(r.Err)
 		return nil
 	}

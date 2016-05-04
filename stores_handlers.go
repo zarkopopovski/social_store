@@ -168,7 +168,7 @@ func (sHandlers *StoresHandlers) ChangeStoreRate(w http.ResponseWriter, r *http.
 
 	store := &Store{id: storeID, credentials_id: token}
 
-	result := store.SetStoreRate(sHandlers.dbConnection, rate)
+	result := store.UpdateStoreRate(sHandlers.dbConnection, rate)
 
 	if result {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")

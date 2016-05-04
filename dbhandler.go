@@ -3,13 +3,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/fzzy/radix/extra/pool"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/mediocregopher/radix.v2/pool"
 )
 
 type DBConnection struct {
-	db   *sql.DB
-	pool *pool.Pool
+	db    *sql.DB
+	cache *pool.Pool
 }
 
 func OpenConnectionSession() (dbConnection *DBConnection) {
@@ -33,10 +33,10 @@ func (dbConnection *DBConnection) createNewDBConnection() (err error) {
 }
 
 func (dbConnection *DBConnection) createNewCacheConnection() (err error) {
-	pool, err := pool.NewPool("tcp", "127.0.0.1:6379", 10)
+	cache, err := pool.New("tcp", "127.0.0.1:6379", 10)
 
 	fmt.Println("Redis Connection is Active")
-	dbConnection.pool = pool
+	dbConnection.cache = cache
 
 	return
 }
